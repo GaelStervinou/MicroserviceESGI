@@ -1,0 +1,57 @@
+syntax = "proto3";
+
+package account.v1alpha;
+
+service AccountService {
+  rpc CreateAccount(CreateAccountRequest) returns (AccountResponse) {}
+  rpc UpdateAccount(UpdateAccountRequest) returns (AccountResponse) {}
+  rpc FindAccountByLabel(GetAccountRequest) returns (AccountResponse) {}
+  rpc FindAllAccounts(EmptyRequest) returns (AccountResponse) {}
+  rpc DeleteAccount(DeleteAccountRequest) returns (AccountResponse) {}
+  rpc GetAllUserAccount(GetAccountByUserRequest) returns (AccountResponse) {}
+}
+
+message EmptyRequest {}
+
+message Account {
+  string label = 1;
+  float balance = 2;
+  string userId = 3;
+}
+
+message CreateAccountRequest {
+  string label = 1;
+  string userId = 2;
+}
+
+message GetAccountRequest {
+  string label = 1;
+}
+
+message DeleteAccountRequest {
+  Account accountToDelete = 1;
+  Account accountToTransferFunds = 2;
+}
+
+message UpdateAccountRequest {
+  Account account = 1;
+}
+
+message CreditAccount {
+  Account account = 1;
+  float amount = 2;
+}
+
+message DebitAccount {
+  Account account = 1;
+  float amount = 2;
+}
+
+message GetAccountByUserRequest {
+  string userId = 1;
+}
+
+message AccountResponse {
+  repeated Account account = 1;
+}
+

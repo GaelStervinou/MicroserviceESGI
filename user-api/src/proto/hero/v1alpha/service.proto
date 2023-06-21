@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package hero.v1alpha;
+
+import "hero/v1alpha/message.proto";
+
+service HeroService {
+  rpc CreateHero(CreateHeroRequest) returns (HeroResponse) {}
+  rpc UpdateHero(UpdateHeroRequest) returns (HeroResponse) {}
+  rpc FindHeroById(GetHeroRequest) returns (HeroResponse) {}
+  rpc FindAllHeros(EmptyRequest) returns (HeroResponse) {}
+  rpc DeleteHero(DeleteHeroRequest) returns (HeroResponse) {}
+}
