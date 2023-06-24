@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+package transaction.v1alpha;
+
+service TransactionService {
+  rpc CreateTransaction(CreateTransactionRequest) returns (TransactionResponse) {}
+  rpc FindAllTransactions(TransactionEmptyRequest) returns (TransactionResponse) {}
+  rpc FindAllCurrentUserTransactions(TransactionEmptyRequest) returns (TransactionResponse) {}
+  rpc FindUserTransactions(TransactionEmptyRequest) returns (TransactionResponse) {}
+  rpc FindAccountTransaction(GetTransactionsByAccount) returns (TransactionResponse) {}
+}
+
+message TransactionEmptyRequest {}
+
+message Transaction {
+  int64 id = 1;
+  float amount = 2;
+  string senderAccountLabel = 3;
+  string receiverAccountLabel = 4;
+}
+
+message CreateTransactionRequest {
+  float amount = 1;
+  string senderAccountLabel = 2;
+  string receiverAccountLabel = 3;
+}
+
+message GetTransactionRequest {
+  int64 id = 1;
+}
+
+message RevertTransactionRequest {
+  int64 id = 1;
+}
+
+message GetTransactionsByUserRequest {
+  string userId = 1;
+}
+
+message TransactionResponse {
+  repeated Transaction transaction = 1;
+}
+
+message GetTransactionsByAccount {
+  string accountLabel = 1;
+}
+
+

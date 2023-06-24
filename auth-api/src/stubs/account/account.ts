@@ -24,30 +24,42 @@ export interface GetAccountRequest {
 }
 
 export interface DeleteAccountRequest {
-  accountToDelete?: Account;
-  accountToTransferFunds?: Account;
+  accountToDeleteLabel?: string;
+  accountToTransferFundsLabel?: string;
 }
 
 export interface UpdateAccountRequest {
   account?: Account;
 }
 
-export interface CreditAccount {
-  account?: Account;
+export interface CreditAccountRequest {
+  accountLabel?: string;
   amount?: number;
 }
 
-export interface DebitAccount {
-  account?: Account;
+export interface DebitAccountRequest {
+  accountLabel?: string;
   amount?: number;
 }
 
-export interface GetAccountByUserRequest {
+export interface GetAccountsByUserRequest {
   userId?: string;
 }
 
 export interface AccountResponse {
   account?: Account[];
+}
+
+export interface SendMoneyRequest {
+  fromAccountLabel?: string;
+  toAccountLabel?: string;
+  amount?: number;
+}
+
+export interface SendMoneyResponse {
+  fromAccount?: Account;
+  toAccount?: Account;
+  amount?: number;
 }
 
 export const ACCOUNT_V1ALPHA_PACKAGE_NAME = "account.v1alpha";
@@ -61,9 +73,17 @@ export interface AccountServiceClient {
 
   findAllAccounts(request: EmptyRequest, metadata?: Metadata): Observable<AccountResponse>;
 
-  deleteAccount(request: DeleteAccountRequest, metadata?: Metadata): Observable<AccountResponse>;
+  deleteAccount(request: DeleteAccountRequest, metadata?: Metadata): Observable<EmptyRequest>;
 
-  getAllUserAccount(request: GetAccountByUserRequest, metadata?: Metadata): Observable<AccountResponse>;
+  getAllCurrentUserAccounts(request: EmptyRequest, metadata?: Metadata): Observable<AccountResponse>;
+
+  getAllUserAccountsById(request: GetAccountsByUserRequest, metadata?: Metadata): Observable<AccountResponse>;
+
+  creditAccount(request: CreditAccountRequest, metadata?: Metadata): Observable<AccountResponse>;
+
+  debitAccount(request: DebitAccountRequest, metadata?: Metadata): Observable<AccountResponse>;
+
+  sendMoney(request: SendMoneyRequest, metadata?: Metadata): Observable<SendMoneyResponse>;
 }
 
 export interface AccountServiceController {
@@ -90,12 +110,32 @@ export interface AccountServiceController {
   deleteAccount(
     request: DeleteAccountRequest,
     metadata?: Metadata,
-  ): Promise<AccountResponse> | Observable<AccountResponse> | AccountResponse;
+  ): Promise<EmptyRequest> | Observable<EmptyRequest> | EmptyRequest;
 
-  getAllUserAccount(
-    request: GetAccountByUserRequest,
+  getAllCurrentUserAccounts(
+    request: EmptyRequest,
     metadata?: Metadata,
   ): Promise<AccountResponse> | Observable<AccountResponse> | AccountResponse;
+
+  getAllUserAccountsById(
+    request: GetAccountsByUserRequest,
+    metadata?: Metadata,
+  ): Promise<AccountResponse> | Observable<AccountResponse> | AccountResponse;
+
+  creditAccount(
+    request: CreditAccountRequest,
+    metadata?: Metadata,
+  ): Promise<AccountResponse> | Observable<AccountResponse> | AccountResponse;
+
+  debitAccount(
+    request: DebitAccountRequest,
+    metadata?: Metadata,
+  ): Promise<AccountResponse> | Observable<AccountResponse> | AccountResponse;
+
+  sendMoney(
+    request: SendMoneyRequest,
+    metadata?: Metadata,
+  ): Promise<SendMoneyResponse> | Observable<SendMoneyResponse> | SendMoneyResponse;
 }
 
 export function AccountServiceControllerMethods() {
@@ -106,7 +146,11 @@ export function AccountServiceControllerMethods() {
       "findAccountByLabel",
       "findAllAccounts",
       "deleteAccount",
-      "getAllUserAccount",
+      "getAllCurrentUserAccounts",
+      "getAllUserAccountsById",
+      "creditAccount",
+      "debitAccount",
+      "sendMoney",
     ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);

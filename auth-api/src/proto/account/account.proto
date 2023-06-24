@@ -7,8 +7,12 @@ service AccountService {
   rpc UpdateAccount(UpdateAccountRequest) returns (AccountResponse) {}
   rpc FindAccountByLabel(GetAccountRequest) returns (AccountResponse) {}
   rpc FindAllAccounts(EmptyRequest) returns (AccountResponse) {}
-  rpc DeleteAccount(DeleteAccountRequest) returns (AccountResponse) {}
-  rpc GetAllUserAccount(GetAccountByUserRequest) returns (AccountResponse) {}
+  rpc DeleteAccount(DeleteAccountRequest) returns (EmptyRequest) {}
+  rpc GetAllCurrentUserAccounts(EmptyRequest) returns (AccountResponse) {}
+  rpc GetAllUserAccountsById(GetAccountsByUserRequest) returns (AccountResponse) {}
+  rpc CreditAccount(CreditAccountRequest) returns (AccountResponse) {}
+  rpc DebitAccount(DebitAccountRequest) returns (AccountResponse) {}
+  rpc SendMoney(SendMoneyRequest) returns (SendMoneyResponse) {}
 }
 
 message EmptyRequest {}
@@ -29,29 +33,42 @@ message GetAccountRequest {
 }
 
 message DeleteAccountRequest {
-  Account accountToDelete = 1;
-  Account accountToTransferFunds = 2;
+  string accountToDeleteLabel = 1;
+  string accountToTransferFundsLabel = 2;
 }
 
 message UpdateAccountRequest {
   Account account = 1;
 }
 
-message CreditAccount {
-  Account account = 1;
+message CreditAccountRequest {
+  string accountLabel = 1;
   float amount = 2;
 }
 
-message DebitAccount {
-  Account account = 1;
+message DebitAccountRequest {
+  string accountLabel = 1;
   float amount = 2;
 }
 
-message GetAccountByUserRequest {
+message GetAccountsByUserRequest {
   string userId = 1;
 }
 
 message AccountResponse {
   repeated Account account = 1;
+}
+
+message SendMoneyRequest {
+  string fromAccountLabel = 1;
+  string toAccountLabel = 2;
+  float amount = 3;
+
+}
+
+message SendMoneyResponse {
+  Account fromAccount = 1;
+  Account toAccount = 2;
+  float amount = 3;
 }
 
