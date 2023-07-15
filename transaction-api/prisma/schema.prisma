@@ -16,4 +16,5 @@ model Transaction {
   amount               Float
   senderAccountLabel   String
   receiverAccountLabel String
+  userId               String
 }

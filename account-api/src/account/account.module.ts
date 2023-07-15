@@ -19,6 +19,7 @@ import {TRANSACTION_V1ALPHA_PACKAGE_NAME} from "../stubs/transaction/transaction
                 name: TRANSACTION_V1ALPHA_PACKAGE_NAME,
                 transport: Transport.GRPC,
                 options: {
+                    url: '0.0.0.0:6001',
                     package: 'transaction.v1alpha',
                     protoPath: join(__dirname, '../proto/transaction/transaction.proto'),
                 },

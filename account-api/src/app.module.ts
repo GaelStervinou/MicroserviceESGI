@@ -4,8 +4,6 @@ import { APP_FILTER } from '@nestjs/core';
 import { GrpcServerExceptionFilter } from 'nestjs-grpc-exceptions';
 import {GrpcReflectionModule} from "nestjs-grpc-reflection";
 import {grpcConfig} from "./grpc.config";
-import {GrpcAuthGuard} from "./auth/auth.guard";
-import {AuthService} from "./auth/auth.service";
 import {AuthModule} from "./auth/auth.module";
 
 @Module({

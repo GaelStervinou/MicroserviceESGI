@@ -1,6 +1,7 @@
 import {Controller, UseFilters, UseGuards} from '@nestjs/common';
 import {RpcException} from '@nestjs/microservices';
 import {GrpcAuthGuard} from 'src/auth/auth.guard';
+import { status } from '@grpc/grpc-js';
 import {
     AccountResponse,
     CreateAccountRequest,
@@ -41,14 +42,14 @@ export class AccountController implements AccountServiceController {
         const countExistingAccountsForUser = await this.accountService.countAccountByUser(userId);
         if (countExistingAccountsForUser['_count']['_all'] === 5) {
             throw new RpcException({
-                statusCode: 409,
+                statusCode: status.ALREADY_EXISTS,
                 message: 'You can\'t have more than 5 accounts',
             });
         }
         const existingLabel = await this.accountService.findByLabel({label: req.label});
         if (existingLabel) {
             throw new RpcException({
-                statusCode: 409,
+                statusCode: status.ALREADY_EXISTS ,
                 message: 'Account already exists',
             });
         }
@@ -72,13 +73,13 @@ export class AccountController implements AccountServiceController {
         const accountToDelete = await this.accountService.findByLabel({label: request.accountToDeleteLabel});
         if (accountToDelete === null) {
             throw new RpcException({
-                statusCode: 404,
+                statusCode: status.NOT_FOUND,
                 message: 'Account not found',
             });
         }
         if (accountToDelete.userId !== metadata['user'].id && metadata['user'].role !== UserRole.USER_ROLE_ADMIN) {
             throw new RpcException({
-                statusCode: 403,
+                statusCode: status.PERMISSION_DENIED,
                 message: 'You can\'t delete this account',
             });
         }
@@ -86,7 +87,7 @@ export class AccountController implements AccountServiceController {
         const accountToTransferFunds = await this.accountService.findByLabel({label: request.accountToTransferFundsLabel});
         if (accountToTransferFunds === null) {
             throw new RpcException({
-                statusCode: 404,
+                statusCode: status.NOT_FOUND,
                 message: 'Account to transfer funds not found',
             });
         }
@@ -96,7 +97,7 @@ export class AccountController implements AccountServiceController {
                 await this.sendMoney({
                     fromAccountLabel: accountToDelete.label,
                     toAccountLabel: request.accountToTransferFundsLabel,
-                    amount: accountToDelete.balance
+                    amount: accountToDelete.balance,
                 });
 
             }
@@ -104,21 +105,24 @@ export class AccountController implements AccountServiceController {
 
             return {};
         } catch (e) {
-            console.log(e)
             throw new RpcException({
-                statusCode: 500,
+                statusCode: status.INTERNAL,
                 message: 'Error while deleting account',
             });
         }
     }
 
     @UseGuards(GrpcAuthGuard)
+    @Roles(UserRole.USER_ROLE_ADMIN)
     async findAllAccounts(request: EmptyRequest, metadata?: Metadata): Promise<AccountResponse> {
         let accounts: Account[] = [];
         try {
             accounts = await this.accountService.findAll();
         } catch (error) {
-            console.log(error, accounts);
+            throw new RpcException({
+                statusCode: status.INTERNAL,
+                message: 'Error while fetching accounts',
+            });
         }
         return {
             account: accounts
@@ -149,13 +153,13 @@ export class AccountController implements AccountServiceController {
         const accountToCredit = await this.accountService.findByLabel({label: request.accountLabel});
         if (accountToCredit === null) {
             throw new RpcException({
-                statusCode: 404,
+                statusCode: status.NOT_FOUND,
                 message: 'Account not found',
             });
         }
         if (accountToCredit.userId !== metadata['user'].id && metadata['user'].role !== UserRole.USER_ROLE_ADMIN) {
             throw new RpcException({
-                statusCode: 403,
+                statusCode: status.PERMISSION_DENIED,
                 message: 'You can\'t credit this account',
             });
         }
@@ -170,13 +174,13 @@ export class AccountController implements AccountServiceController {
         const accountToDebit = await this.accountService.findByLabel({label: request.accountLabel});
         if (accountToDebit === null) {
             throw new RpcException({
-                statusCode: 404,
+                statusCode: status.NOT_FOUND,
                 message: 'Account not found',
             });
         }
         if (accountToDebit.userId !== metadata['user'].id && metadata['user'].role !== UserRole.USER_ROLE_ADMIN) {
             throw new RpcException({
-                statusCode: 403,
+                statusCode: status.PERMISSION_DENIED,
                 message: 'You can\'t credit this account',
             });
         }
@@ -186,13 +190,15 @@ export class AccountController implements AccountServiceController {
         }
     }
 
+    @UseGuards(GrpcAuthGuard)
     async sendMoney(request: SendMoneyRequest, metadata?: Metadata): Promise<SendMoneyResponse> {
         // @ts-ignore
         try {
             await this.accountService.sendMoney({
                 sender: request.fromAccountLabel,
                 receiver: request.toAccountLabel,
-                amount: request.amount
+                amount: request.amount,
+                userId: metadata['user'].id,
             });
             return {
                 fromAccount: await this.accountService.findByLabel({label: request.fromAccountLabel}),
@@ -200,8 +206,10 @@ export class AccountController implements AccountServiceController {
                 amount: request.amount
             }
         } catch (e) {
-            console.log(e);
-            return;
+            throw new RpcException({
+                statusCode: status.INTERNAL,
+                message: 'Error while sending money',
+            });
         }
     }
 }

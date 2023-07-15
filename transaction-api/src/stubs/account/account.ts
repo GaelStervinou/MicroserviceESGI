@@ -60,6 +60,7 @@ export interface SendMoneyResponse {
   fromAccount?: Account;
   toAccount?: Account;
   amount?: number;
+  userId?: string;
 }
 
 export const ACCOUNT_V1ALPHA_PACKAGE_NAME = "account.v1alpha";

@@ -16,7 +16,6 @@ export class GrpcAuthGuard implements CanActivate {
         'roles',
         context.getHandler(),
       );
-
       const request = context.switchToRpc().getContext();
 
       const type = context.getType();

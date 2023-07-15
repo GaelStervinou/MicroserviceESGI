@@ -13,12 +13,14 @@ export interface Transaction {
   amount?: number;
   senderAccountLabel?: string;
   receiverAccountLabel?: string;
+  userId?: string;
 }
 
 export interface CreateTransactionRequest {
   amount?: number;
   senderAccountLabel?: string;
   receiverAccountLabel?: string;
+  userId?: string;
 }
 
 export interface GetTransactionRequest {
@@ -53,7 +55,7 @@ export interface TransactionServiceClient {
     metadata?: Metadata,
   ): Observable<TransactionResponse>;
 
-  findUserTransactions(request: TransactionEmptyRequest, metadata?: Metadata): Observable<TransactionResponse>;
+  findUserTransactions(request: GetTransactionsByUserRequest, metadata?: Metadata): Observable<TransactionResponse>;
 
   findAccountTransaction(request: GetTransactionsByAccount, metadata?: Metadata): Observable<TransactionResponse>;
 }
@@ -75,7 +77,7 @@ export interface TransactionServiceController {
   ): Promise<TransactionResponse> | Observable<TransactionResponse> | TransactionResponse;
 
   findUserTransactions(
-    request: TransactionEmptyRequest,
+    request: GetTransactionsByUserRequest,
     metadata?: Metadata,
   ): Promise<TransactionResponse> | Observable<TransactionResponse> | TransactionResponse;
 

@@ -1,31 +1,15 @@
-import {Inject, Injectable, OnModuleInit, UseFilters} from '@nestjs/common';
+import {Inject, Injectable, OnModuleInit} from '@nestjs/common';
 import {PrismaService} from '../prisma.service';
 import {Prisma, Account} from '@prisma/client';
 import {PrismaClientExceptionFilter} from "./exception/prisma-exception.filter";
-import {Client} from "@grpc/grpc-js";
-import {Transport, ClientGrpc} from '@nestjs/microservices';
+import {ClientGrpc} from '@nestjs/microservices';
 import {TransactionServiceClient} from "../stubs/transaction/transaction";
-import {join} from "path";
 import {TRANSACTION_V1ALPHA_PACKAGE_NAME} from "../stubs/transaction/transaction";
+import {firstValueFrom} from "rxjs";
 
 @Injectable()
 export class AccountService implements OnModuleInit {
 
-    /*
-    @Client({
-        transport: Transport.GRPC,
-        options: {
-            package: 'TransactionService',
-            protoPath: join(__dirname, 'proto/transaction/transaction.proto')
-        },
-    })
-    client: ClientGrpc;
-
-    private heroesService: HeroesService;
-
-    onModuleInit() {
-        this.heroesService = this.client.getService<HeroesService>('HeroesService');
-    }*/
     private transactionService: TransactionServiceClient;
 
     constructor(@Inject(TRANSACTION_V1ALPHA_PACKAGE_NAME) private client: ClientGrpc, private prisma: PrismaService) {
@@ -141,8 +125,9 @@ export class AccountService implements OnModuleInit {
         sender: string;
         receiver: string;
         amount: number;
+        userId: string;
     }): Promise<Account> {
-        const {sender, receiver, amount} = params;
+        const {sender, receiver, amount, userId} = params;
         let senderAccount;
         let receiverAccount;
 
@@ -170,9 +155,10 @@ export class AccountService implements OnModuleInit {
                 amount: amount,
                 senderAccountLabel: sender,
                 receiverAccountLabel: receiver,
+                userId: userId,
             });
 
-            console.log(transaction[0])
+            console.log(await firstValueFrom(transaction));
 
         } catch (e) {
             if (senderAccount) {

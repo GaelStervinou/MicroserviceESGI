@@ -6,7 +6,7 @@ service TransactionService {
   rpc CreateTransaction(CreateTransactionRequest) returns (TransactionResponse) {}
   rpc FindAllTransactions(TransactionEmptyRequest) returns (TransactionResponse) {}
   rpc FindAllCurrentUserTransactions(TransactionEmptyRequest) returns (TransactionResponse) {}
-  rpc FindUserTransactions(TransactionEmptyRequest) returns (TransactionResponse) {}
+  rpc FindUserTransactions(GetTransactionsByUserRequest) returns (TransactionResponse) {}
   rpc FindAccountTransaction(GetTransactionsByAccount) returns (TransactionResponse) {}
 }
 
@@ -17,12 +17,14 @@ message Transaction {
   float amount = 2;
   string senderAccountLabel = 3;
   string receiverAccountLabel = 4;
+  string userId = 5;
 }
 
 message CreateTransactionRequest {
   float amount = 1;
   string senderAccountLabel = 2;
   string receiverAccountLabel = 3;
+  string userId = 4;
 }
 
 message GetTransactionRequest {
