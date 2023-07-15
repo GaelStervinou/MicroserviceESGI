@@ -1,6 +1,22 @@
 version: '3.8'
 
 services:
+  mongo:
+    image: mongo
+    ports:
+      - 27017:27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: task
+
+  mariadb:
+    image: mariadb
+    ports:
+      - 3306:3306
+    environment:
+      MARIADB_ROOT_PASSWORD: passwd
+      MARIADB_DATABASE: user
+
   auth-api:
     image: gplane/pnpm:node18
     working_dir: /app
@@ -11,7 +27,7 @@ services:
       - /app/.pnpm-store
     environment:
       - MYSQL_URL=mysql://root:passwd@mariadb:3306/auth
-      - insecure=false
+      - insecure=true
       - AUTH_CERT=/certs/auth.pem
       - AUTH_KEY=/certs/auth-key.pem
       - PORT=4000
@@ -24,7 +40,7 @@ services:
     ports:
       - 4002:4000
     stdin_open: true
-    command: start:dev
+    command: bash -c "pnpm install && pnpm prisma generate && pnpm prisma db push && pnpm start:dev"
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:3000/health" ]
       interval: 5s
@@ -41,7 +57,7 @@ services:
       - /app/.pnpm-store
     environment:
       - MYSQL_URL=mysql://root:passwd@mariadb:3306/user
-      - insecure=false
+      - insecure=true
       - PORT=4000
       - AUTH_API_URL=auth-api:4000
       - USER_CERT=/certs/user.pem
@@ -51,39 +67,70 @@ services:
     ports:
       - 4001:4000
     stdin_open: true
-    command: start:dev
+    command: bash -c "pnpm install && pnpm prisma generate && pnpm prisma db push && pnpm start:dev"
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:3000/health" ]
       interval: 5s
       timeout: 10s
       retries: 5
 
-  task-api:
+  account-api:
     image: gplane/pnpm:node18
     working_dir: /app
     volumes:
-      - ../task-api:/app/
+      - ../account-api:/app/
       - ../local/certs:/certs
       - /app/node_modules
       - /app/.pnpm-store
     environment:
-      - MONGO_URL=mongodb://root:task@mongo
-      - insecure=false
-      - PORT=4000
-      - TASK_CERT=/certs/task.pem
-      - TASK_KEY=/certs/task-key.pem
-      - AUTH_API_URL=auth-api:4000
+      - MYSQL_URL=mysql://root:passwd@mariadb:3306/account
+      - insecure=true
+      - USER_CERT=/certs/account.pem
+      - USER_KEY=/certs/account-key.pem
       - ROOT_CA=/certs/rootCA.pem
+      - PORT=4000
+      - AUTH_API_URL=auth-api:4000
       - JAEGER_URL=http://tracing:14268/api/traces
     ports:
-      - 4000:4000
+      - "4005:4000"
     stdin_open: true
-    command: start:dev
+    command: bash -c "pnpm install && pnpm prisma generate && pnpm prisma db push && pnpm start:dev"
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:3000/health" ]
+      test: [ "CMD", "curl", "-f", "http://localhost:3000/health"]
       interval: 5s
       timeout: 10s
       retries: 5
+    depends_on:
+      - mariadb
+
+  transaction-api:
+    image: gplane/pnpm:node18
+    working_dir: /app
+    volumes:
+      - ../transaction-api:/app/
+      - ../local/certs:/certs
+      - /app/node_modules
+      - /app/.pnpm-store
+    environment:
+      - MYSQL_URL=mysql://root:passwd@mariadb:3306/transaction
+      - insecure=true
+      - USER_CERT=/certs/transaction.pem
+      - USER_KEY=/certs/transaction-key.pem
+      - ROOT_CA=/certs/rootCA.pem
+      - PORT=4000
+      - AUTH_API_URL=auth-api:4000
+      - JAEGER_URL=http://tracing:14268/api/traces
+    ports:
+      - "4006:4000"
+    stdin_open: true
+    command: bash -c "pnpm install && pnpm prisma generate && pnpm prisma db push && pnpm start:dev"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 5s
+      timeout: 10s
+      retries: 5
+    depends_on:
+      - mariadb
 
 networks:
   default:

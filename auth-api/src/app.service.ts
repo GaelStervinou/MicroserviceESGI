@@ -34,7 +34,6 @@ export class AppService implements OnModuleInit {
     const res: CheckPasswordResponse = await firstValueFrom(
       this.userService.checkPassword({ email, password }) as any,
     );
-console.log(res)
     return res;
   }
 

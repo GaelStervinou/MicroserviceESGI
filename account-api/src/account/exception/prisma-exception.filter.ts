@@ -15,7 +15,6 @@ export class PrismaClientExceptionFilter
   }
 
   private getRPCStatusCode(code: string): number {
-    console.log('code', code);
     switch (code) {
       case 'P2000':
         return 3;

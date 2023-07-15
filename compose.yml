@@ -3,12 +3,12 @@ version: '3.8'
 services:
   mariadb:
     extends:
-      file: ./compose/compose.db.yml
+      file: ./compose/compose.local.yml
       service: mariadb
 
   mongo:
     extends:
-      file: ./compose/compose.db.yml
+      file: ./compose/compose.local.yml
       service: mongo
 
   tracing:
@@ -22,23 +22,31 @@ services:
 
   auth-api:
     extends:
-      file: ./compose/compose.published.yml
+      file: ./compose/compose.local.yml
       service: auth-api
+    depends_on:
+      - mariadb
 
   user-api:
     extends:
-      file: ./compose/compose.published.yml
+      file: ./compose/compose.local.yml
       service: user-api
+    depends_on:
+      - mariadb
 
-  task-api:
+  account-api:
     extends:
-      file: ./compose/compose.published.yml
-      service: task-api
+      file: ./compose/compose.local.yml
+      service: account-api
+    depends_on:
+      - mariadb
 
-  front:
+  transaction-api:
     extends:
-      file: ./compose/compose.published.yml
-      service: front
+      file: ./compose/compose.local.yml
+      service: transaction-api
+    depends_on:
+      - mariadb
 
 networks:
   default:

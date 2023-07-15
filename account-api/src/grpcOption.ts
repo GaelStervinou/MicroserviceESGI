@@ -1,7 +1,6 @@
 import { ChannelCredentials, ServerCredentials } from '@grpc/grpc-js';
 import { ConfigService } from '@nestjs/config';
 import {
-  ClientProviderOptions,
   GrpcOptions,
   Transport,
 } from '@nestjs/microservices';
@@ -14,8 +13,8 @@ export default (cs: ConfigService) =>
   addReflectionToGrpcConfig({
     transport: Transport.GRPC,
     options: {
-      package: 'user.v1alpha',
-      url: `0.0.0.0:${cs.get('PORT') || 4002}`,
+      package: 'account.v1alpha',
+      url: `0.0.0.0:${cs.get('PORT') || 4005}`,
       credentials: !cs.get<boolean>('insecure')
         ? ServerCredentials.createSsl(null, [
             {
@@ -27,7 +26,7 @@ export default (cs: ConfigService) =>
       loader: {
         includeDirs: [join(__dirname, 'proto')],
       },
-      protoPath: [join(__dirname, 'proto/user/v1alpha/service.proto')],
+      protoPath: [join(__dirname, 'proto/account/account.proto')],
     },
   } as GrpcOptions);
 

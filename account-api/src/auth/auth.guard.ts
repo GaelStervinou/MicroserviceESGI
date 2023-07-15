@@ -61,7 +61,6 @@ export class GrpcAuthGuard implements CanActivate {
 
       return true;
     } catch (error) {
-      console.log({ error });
       if (error instanceof RpcException) throw error;
       throw new RpcException({
         code: status.PERMISSION_DENIED,

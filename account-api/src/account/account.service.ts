@@ -158,7 +158,6 @@ export class AccountService implements OnModuleInit {
                 userId: userId,
             });
 
-            console.log(await firstValueFrom(transaction));
 
         } catch (e) {
             if (senderAccount) {
