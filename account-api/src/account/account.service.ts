@@ -157,6 +157,9 @@ export class AccountService implements OnModuleInit {
                 receiverAccountLabel: receiver,
                 userId: userId,
             });
+            firstValueFrom(transaction).then((value) => {
+                console.log(value);
+            });
 
 
         } catch (e) {
